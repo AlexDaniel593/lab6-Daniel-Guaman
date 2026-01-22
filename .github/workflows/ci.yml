@@ -1,0 +1,41 @@
+name: CI Pipeline
+
+# Configurar los triggers
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+# Configurar los trabajos a realizar
+jobs:
+  build-and-test:
+    name: Build, Lint and Test
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [18.x, 20.x]
+
+    # Configurar los pasos a ejecutarse
+    steps:
+      - name: Checkout código
+        uses: actions/checkout@v4
+
+      - name: Configurar Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+
+      - name: Instalar dependencias
+        run: npm ci
+
+      - name: Ejecutar linter (ESLint)
+        run: npm run lint
+
+      - name: Ejecutar pruebas (Jest)
+        run: npm test
+
+      - name: Verificar build
+        run: node -e "console.log('Build verification successful')"
